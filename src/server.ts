@@ -1,7 +1,41 @@
-import app from './app';
+import express, { Application } from "express";
+import cors from "cors";
 
-const PORT = process.env.PORT || 3000;
+class Server {
+    private port: number | string;
+    private app: Application;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+    constructor(port: number | string) {
+        this.port = port;
+        this.app = express();
+    }
+
+    private setupMiddlewares(): void {
+        this.app.use(cors());
+        this.app.use(express.json());
+    }
+
+    private setupRoutes(): void {
+        // Aquí se pueden agregar más rutas según sea necesario
+    
+    }
+
+    private startServer(): void {
+        this.app.listen(this.port, () => {
+            console.log(`Servidor corriendo en http://localhost:${this.port}`);
+        });
+    }
+
+
+    public async init(): Promise<void> {
+        this.setupMiddlewares();
+        this.setupRoutes();
+        this.startServer();
+    }
+
+    public getApp(): Application {
+        return this.app;
+    }
+}
+
+export default Server;

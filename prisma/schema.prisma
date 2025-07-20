@@ -1,0 +1,154 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url = env("DATABASE_URL")
+}
+
+model Rol {
+  id     Int     @id @default(autoincrement())
+  nombre String  @unique
+
+  usuarios User[]
+}
+
+
+model User{
+    id Int @id @default(autoincrement())
+    email String @unique
+    password String
+    rol       Rol     @relation(fields: [rolId], references: [id])
+    rolId     Int
+    Veterinaria Veterinaria[]
+    Veterinarios Veterinarios[]
+
+    Cliente Cliente[]
+}
+
+model Veterinaria{
+    id Int @id @default(autoincrement())
+    userId Int
+    user User @relation(fields: [userId], references: [id])
+    nombre String
+    direccion String
+    telefono String
+    email String
+
+    Veterinarios Veterinarios[]
+
+    Medicamento Medicamento[]
+}
+
+model Veterinarios{
+    id Int @id @default(autoincrement())
+    nombreCompleto String
+    especialidad String
+    telefono String
+    email String
+    verterinariaId Int
+    veterinaria Veterinaria @relation(fields: [verterinariaId], references: [id])
+    userId Int
+    user User @relation(fields: [userId],references: [id])
+}
+
+model Cliente{
+    id Int @id @default(autoincrement())
+    nombreCompleto String
+    direccion String
+    telefono String
+    email String
+    userId Int
+    user User @relation(fields: [userId],references: [id])
+
+    Mascota Mascota[]
+
+    Citas Citas[]
+}
+
+model Mascota {
+    id Int @id @default(autoincrement())
+    nomber String
+    especie String
+    raza String
+    fechaNacimiento DateTime
+    clienteId Int
+    cliente Cliente @relation(fields: [clienteId], references: [id])
+    Citas Citas[]
+}
+
+model Citas{
+    id Int @id @default(autoincrement())
+    fecha DateTime
+    motivo String
+    estado String
+    mascotaId Int
+    mascota Mascota @relation(fields: [mascotaId], references: [id])
+    clienteId Int
+    cliente Cliente @relation(fields: [clienteId], references: [id])
+
+
+    Receta Receta[]
+}
+
+model CategoriaMedicamento {
+  id          Int          @id @default(autoincrement())
+  nombre      String       @unique
+  descripcion String?
+
+  medicamentos Medicamento[] // Relación 1:N
+}
+
+model Medicamento {
+  id               Int                  @id @default(autoincrement())
+  nombre           String
+  descripcion      String?
+  fechaCaducidad   DateTime
+  cantidad         Int
+  veterinaria      Veterinaria          @relation(fields: [veterinariaId], references: [id])
+  veterinariaId    Int
+
+  categoria        CategoriaMedicamento @relation(fields: [categoriaId], references: [id])
+  categoriaId      Int
+
+  precios          MedicamentoPrecio[] // relación 1:N con tabla de precios
+
+  RecetaItem RecetaItem[]
+}
+
+model MedicamentoPrecio {
+  id             Int         @id @default(autoincrement())
+  precioCompra   Decimal     @db.Decimal(10, 2)
+  precioVenta    Decimal     @db.Decimal(10, 2)
+  vigente        Boolean     @default(true)
+  fechaRegistro  DateTime    @default(now())
+
+  medicamento    Medicamento @relation(fields: [medicamentoId], references: [id])
+  medicamentoId  Int
+}
+
+model Receta {
+  id           Int          @id @default(autoincrement())
+  cita         Citas         @relation(fields: [citaId], references: [id])
+  citaId       Int
+  notas        String?
+
+  items        RecetaItem[]
+  createdAt    DateTime     @default(now())
+}
+
+model RecetaItem {
+  id             Int          @id @default(autoincrement())
+  receta         Receta       @relation(fields: [recetaId], references: [id])
+  recetaId       Int
+
+  medicamento    Medicamento  @relation(fields: [medicamentoId], references: [id])
+  medicamentoId  Int
+
+  dosis          String       // Ej: "1 tableta cada 12h"
+  duracion       String       // Ej: "por 5 días"
+  observaciones  String?
+}
+
+
