@@ -1,12 +1,9 @@
 import { Router } from 'express';
+import userRoutes from './user.route';
 
 const router = Router();
 
-// Aquí importarás y montarás otras rutas
-// router.use('/auth', authRoutes);
+router.use("/user", userRoutes);
 
-router.get('/', (req, res) => {
-  res.json({ message: 'API Express funcionando correctamente' });
-});
 
 export default router;
