@@ -1,9 +1,11 @@
 import { Router } from 'express';
 import userRoutes from './user.route';
 
-const router = Router();
+export default function routerApi(): Router{
+    const router = Router();
+    router.use(userRoutes());
+    
+    return router;
+}
 
-router.use("/user", userRoutes);
 
-
-export default router;

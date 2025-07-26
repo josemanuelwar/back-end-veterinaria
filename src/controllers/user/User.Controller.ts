@@ -1,33 +1,46 @@
 import { Request, Response } from "express";
+
 import UserService from "../../services/user/User.Service";
+import generarPasswordHasheada from "../../utils/Paswordhas";
+
 
 class UserController {
-
-    private readonly service: UserService;
-
-    public constructor() {
-        this.service = new UserService();
-    }
+    private readonly service = new UserService();
 
 
-    public index() {
-        return "hola";
-    }
-
-    public async store(request: Request, response: Response) {
+    public login = async (request: Request, response: Response) => {
         try {
-            const { email, password, rol } = request.body;
-            const newUser = await this.service.Save({ email, password, rol });
-            response.status(200).json({ data: { newUser } });
+
+            const { email, password } = request.body;
+            const valido = await this.service.validarLogin(email, password);
+
+            if (!valido) {
+                return response.status(401).json({ message: 'Credenciales incorrectas' });
+            }
+
+            response.status(200).json({ message: 'Login correcto' });
+
         } catch (error) {
-            response.status(500).json({
-                data: {
-                    message: "Error en el servidor"
-                }
-            });
+            response.status(500).json({ message: 'Error en el servidor' });
         }
     }
 
+    public store = async (request: Request, response: Response) => {
+        try {
+            const { email, rol } = request.body;
+            const { plain, hash } = await generarPasswordHasheada();
+
+            const newUser = await this.service.Save({ email, password: hash, rol });
+
+            response.status(201).json({
+                message: 'Usuario creado correctamente',
+                data: newUser,
+                passwordTemporal: plain // opcional
+            });
+        } catch (error) {
+            response.status(500).json({ message: 'Error en el servidor' });
+        }
+    };
 }
 
 export default new UserController();
