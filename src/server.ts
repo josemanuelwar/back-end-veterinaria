@@ -1,6 +1,8 @@
 import express, { Application } from "express";
 import cors from "cors";
 
+import routerApi from "./routes";
+
 class Server {
     private port: number | string;
     private app: Application;
@@ -17,6 +19,8 @@ class Server {
 
     private setupRoutes(): void {
         // Aquí se pueden agregar más rutas según sea necesario
+        this.app.use("/api",routerApi());
+        
     
     }
 
